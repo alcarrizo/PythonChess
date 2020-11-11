@@ -5,6 +5,7 @@ from King import King
 from Queen import Queen
 from Rook import Rook
 from Knight import Knight
+from _thread import *
 
 class Game:
     def __init__(self,wkx,wky,bkx,bky):
@@ -261,22 +262,246 @@ class Game:
         return checkMate
 
     def stopCheck(self,x,y,board):
-        pass
+
+        stopped = False
+        kx = 0
+        ky = 0
+
+        if board[x][y].team:
+            kx = self.blackKingX
+            ky = self.blackKingY
+        else:
+            kx = self.whitekingX
+            ky = self.whitekingY
+
+        # checking if the king can capture the piece putting it in check
+        if board[kx][ky].ValidMove(kx,ky,x,y,board) and not self.allyKinginCheck(kx,ky,x,y,board):
+            stopped = True
+
+        # checking if the piece putting the king in check can be captured
+        for i in range(8):
+            for j in range(8):
+                if board[i][j] is not None and board[i][j].team == board[x][y].team and board[i][j].ValidMove(i, j, x, y, board) and not self.allyKinginCheck(kx, ky, x, y, board):
+                    stopped = True
+
+        if not isinstance(board[x][y],Knight) and stopped == False:
+            yMove = 0
+            xMove = 0
+            tempX = x
+            tempY = y
+
+            if x > kx:
+                xMove = -1
+            else:
+                xMove = 1
+            if y > ky:
+                yMove = -1
+            else:
+                yMove = 1
+
+            while tempX + xMove != kx or tempY + yMove != ky:
+                tempX += xMove
+                tempY += yMove
+                for i in range(8):
+                    for j in range(8):
+                        if board[i,j] is not None:
+                            if not isinstance(board[i][j], King) and board[i][j].team != board[x, y].team and board[i][j].ValidMove(i, j,tempX, tempY, board) and not self.AllyKinginCheck(i, j, tempX, tempY, board):
+                                stopped = True;
+        return stopped
+
 
     def FindCheckPieces(self,team,board):
-        pass
+        kx = 0
+        ky = 0
+
+        if team:
+            kx = self.blackKingX
+            ky = self.blackKingY
+        else:
+            kx = self.whitekingX
+            ky = self.whitekingY
+        self.Capture(kx,ky,board[kx][ky].team,board)
 
     def Capture(self,x,y,team,board):
-        pass
+        check = False
+        checkPiece = False
+
+        for i in range(8):
+            for j in range(8):
+                checkPiece = False
+                if board[i][j] is not None and board[i][j].team != team:
+                    if isinstance(board[i][j],Pawn):
+                        slope = abs(y - j) / abs(x - i)
+
+                        if slope == 1 and abs(x - i) <= 1 and abs(y -j) <= 1:
+                            if board[i][j].team and y > j:
+                                check = True
+                                checkPiece = True
+                            elif board[i][j].team and y < j:
+                                check = True
+                                checkPiece = True
+                            if checkPiece == True and board[x][y] is not None and isinstance(board[x][y],King):
+                                self.checkPieces.append((i,j))
+                    elif board[i][j].ValidMove(i,j,x,y,board):
+                        check = True
+                        if board[i][j] is not None and isinstance(board[i][j],King):
+                            self.checkPieces.append((i,j))
+        return check
+
 
     def removePieces(self,tempPiece,moveInfo,livePieces,whitePieces,blackPieces,board):
-        pass
+        livePieces.remove(tempPiece)
+        if tempPiece.team:
+            whitePieces.remove(tempPiece)
+        else:
+            blackPieces.remove(tempPiece)
+
+        tempBool = False
+
+        tempBool = start_new_thread(self.insufficientMaterial,(livePieces,whitePieces,blackPieces,board))
+
+        if tempBool:
+            moveInfo.Draw = True
+
 
     def insufficientMaterial(self,livePieces,whitePieces,blackPieces,board):
-        pass
+        if len(livePieces) == 2:
+            return True
+        elif len(livePieces) == 3:
+            for piece in livePieces:
+                if isinstance(piece,Bishop) or isinstance(piece,Knight):
+                    return True
+        elif len(whitePieces) == 2 and len(blackPieces) == 2:
+            bishops = [piece for piece in livePieces if isinstance(piece,Bishop)]
+
+            if len(bishops) == 2:
+                wbx = 0
+                wby = 0
+                bbx = 0
+                bby = 0
+
+                for i in range(8):
+                    for j in range(8):
+                        if isinstance(board[i][j],Bishop):
+                            if board[i][j].team:
+                                wbx = i
+                                wby = j
+                            else:
+                                bbx = i
+                                bby = j
+                if ((wbx*8) + wby)%2 == ((bbx*8) + bby)%2:
+                    return True
+        return False
 
     def updateEnemyPieces(self, moveInfo, board,livePieces,whitePieces,blackPieces):
-        pass
+        tempPawn2 = None
+        tempPiece = None
+
+        #castling
+        if moveInfo.Castling == True:
+            board[moveInfo.rookEndX][moveInfo.rookEndY] = board[moveInfo.rookStartX][moveInfo.rookStartY]
+            board[moveInfo.rookStartX][ moveInfo.rookStartY] = None
+
+            board[moveInfo.endX][moveInfo.endY] = board[moveInfo.startX][moveInfo.startY]
+            board[moveInfo.startX][moveInfo.startY] = None
+
+            if board[moveInfo.endX][moveInfo.endY].team == True:
+
+                self.whitekingX = moveInfo.endX;
+                self.whitekingY = moveInfo.endY;
+            else:
+                self.blackKingX = moveInfo.endX;
+                self.blackKingY = moveInfo.endY;
+        #enPassant
+        elif moveInfo.enPassant == True:
+            board[moveInfo.endX][moveInfo.endY] = board[moveInfo.startX][moveInfo.startY]
+            board[moveInfo.startX][moveInfo.startY] = None
+
+            self.removePieces(board[moveInfo.pawnX][moveInfo.pawnY], moveInfo, livePieces, whitePieces, blackPieces, board)
+            board[moveInfo.pawnX][moveInfo.pawnY] = None
+        #promotion
+        elif moveInfo.promotion == True:
+            tempPiece = board[moveInfo.startX, moveInfo.startY]
+            if moveInfo.pawnEvolvesTo == "Queen":
+                board[moveInfo.startX][moveInfo.startY] = Queen(board[moveInfo.startX][moveInfo.startY].team)
+            if moveInfo.pawnEvolvesTo == "Knight":
+                board[moveInfo.startX][moveInfo.startY] = Knight(board[moveInfo.startX][moveInfo.startY].team)
+            if moveInfo.pawnEvolvesTo == "Bishop":
+                board[moveInfo.startX][moveInfo.startY] = Bishop(board[moveInfo.startX][moveInfo.startY].team)
+            if moveInfo.pawnEvolvesTo == "Rook":
+                board[moveInfo.startX][moveInfo.startY] = Rook(board[moveInfo.startX][moveInfo.startY].team)
+
+            livePieces.remove(tempPiece)
+            livePieces.append(board[moveInfo.startX][moveInfo.startY])
+
+            if tempPiece.team:
+                whitePieces.remove(tempPiece)
+                whitePieces.append(board[moveInfo.startX][moveInfo.startY])
+
+            else:
+                blackPieces.remove(tempPiece)
+                blackPieces.append(board[moveInfo.startX][moveInfo.startY])
+        #regular move
+        else:
+            if isinstance(board[moveInfo.startX][moveInfo.startY],King):
+                if board[moveInfo.startX][moveInfo.startY].team == True:
+                    self.whitekingX = moveInfo.endX
+                    self.whitekingY = moveInfo.endY
+
+                else:
+
+                    self.blackKingX = moveInfo.endX;
+                    self.blackKingY = moveInfo.endY;
+            elif isinstance(board[moveInfo.startX][moveInfo.startY], Pawn):
+                if abs(moveInfo.startY - moveInfo.endY) == 2 and (
+                        (moveInfo.startX > 0 and isinstance(board[moveInfo.endX - 1][moveInfo.endY],Pawn)) or (
+                        moveInfo.startX < self.width - 1 and isinstance(board[moveInfo.endX + 1][moveInfo.endY], Pawn))):
+                    if tempPawn2 is not None:
+                        if tempPawn2.enPassant == True:
+                            tempPawn2.enPassant = False
+                    tempPawn2 = board[moveInfo.startX][moveInfo.startY]
+                    tempPawn2.enPassant = True
+            else:
+                if tempPawn2 is not None:
+                    if tempPawn2.enPassant == True:
+                        tempPawn2.enPassant = False
+                    tempPawn2 = None
+
+        if board[moveInfo.endX][moveInfo.endY] is not None and board[moveInfo.startX][moveInfo.startY] is not None and board[
+            moveInfo.startX][moveInfo.startY].team != board[moveInfo.endX][moveInfo.endY].team:
+                tempPiece = board[moveInfo.endX][moveInfo.endY]
+        temp = board[moveInfo.startX][moveInfo.startY]
+        board[moveInfo.startX][moveInfo.startY] = None
+        board[moveInfo.endX][moveInfo.endY] = temp
+
+        if tempPiece is not None:
+            self.removePieces(tempPiece,moveInfo,livePieces,whitePieces,blackPieces,board)
+
+        #checks
+        if moveInfo.check == True:
+            kx = 0
+            ky = 0
+            if board[moveInfo.endX][moveInfo.endY].team:
+                kx = self.blackKingX
+                ky = self.blackKingY
+            else:
+                kx = self.whitekingX
+                ky = self.whitekingY
+        else:
+            kx = 0
+            ky = 0
+            if board[moveInfo.endX][moveInfo.endY].team:
+                kx = self.blackKingX
+                ky = self.blackKingY
+            else:
+                kx = self.whitekingX
+                ky = self.whitekingY
+
+
+
+
+
+    pass
 
     def allyPieces(self,x1,y1,x2,y2,board):
         if board[x1][y1].team == board[x2][y2].team:
