@@ -5,7 +5,10 @@ from King import King
 from Queen import Queen
 from Rook import Rook
 from Knight import Knight
+from movement import Movement
+
 from Piece import Piece
+from _thread import *
 
 class Board:
     def __init__(self):
@@ -32,6 +35,57 @@ class Board:
         self.board[self.height - 1][5] = Bishop(False)
         self.board[self.height - 1][6] = Knight(False)
         self.board[self.height - 1][7] = Rook(False)
+        self.whitePieces = []
+        self.blackPieces = []
+        self.livePieces = []
+
+    def getPieces(self):
+        for i in range(self.width):
+            for j in range(self.height):
+                if self.board[i][j] is not None:
+                    if self.board[i][j].team:
+                        self.whitePieces.append(self.board[i][j])
+                        self.livePieces.append(self.board[i][j])
+                    else:
+                        self.blackPieces.append(self.board[i][j])
+                        self.livePieces.append(self.board[i][j])
+
+    def removePiece(self,piece):
+        pass
+    def enemyChecks(self,x2,y2):
+        pass
+
+    def changePiece(self,x2,y2,name):
+        name = name.upper()
+        tempPiece = self.board[x2][y2]
+
+        if name == "QUEEN":
+            self.board[x2][y2] = Queen(self.board[x2][y2].team)
+        elif name == "ROOK":
+            self.board[x2][y2] = Rook(self.board[x2][y2].team)
+        elif name == "KNIGHT":
+            self.board[x2][y2] = Knight(self.board[x2][y2].team)
+        elif name == "BISHOP":
+            self.board[x2][y2] = Bishop(self.board[x2][y2].team)
+
+        self.livePieces.remove(tempPiece)
+        self.livePieces.append(self.board[x2][y2])
+
+        if tempPiece.team:
+            self.whitePieces.remove(tempPiece)
+            self.whitePieces.append(self.board[x2][y2])
+        else:
+            self.blackPieces.remove(tempPiece)
+            self.blackPieces.append(self.board[x2][y2])
+
+        tempBool = False
+        # insufficient material draw code here
+
+
+
+
+
+
 
 
     def boardUpdate(self,win):
@@ -43,6 +97,7 @@ class Board:
                     win.blit(self.board[i][j].surf,((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
                     # white player rotation
                     #win.blit(pygame.transform.flip(self.board[i][j].surf, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
+
 
     def move(self,x1,y1,x2,y2):
         if self.board[x1][y1] is not None:

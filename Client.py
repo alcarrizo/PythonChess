@@ -1,5 +1,7 @@
 import pygame
 from Board import Board
+from movement import Movement
+
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 700
 
