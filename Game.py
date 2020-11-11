@@ -497,12 +497,6 @@ class Game:
                 kx = self.whitekingX
                 ky = self.whitekingY
 
-
-
-
-
-    pass
-
     def allyPieces(self,x1,y1,x2,y2,board):
         if board[x1][y1].team == board[x2][y2].team:
             return True

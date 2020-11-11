@@ -6,6 +6,7 @@ from Queen import Queen
 from Rook import Rook
 from Knight import Knight
 from movement import Movement
+from Game import Game
 
 from Piece import Piece
 from _thread import *
@@ -38,6 +39,8 @@ class Board:
         self.whitePieces = []
         self.blackPieces = []
         self.livePieces = []
+        self.game = Game(3,0,3,self.height - 1)
+        self.moveInfo = Movement()
 
     def getPieces(self):
         for i in range(self.width):
@@ -50,12 +53,13 @@ class Board:
                         self.blackPieces.append(self.board[i][j])
                         self.livePieces.append(self.board[i][j])
 
-    def removePiece(self,piece):
-        pass
-    def enemyChecks(self,x2,y2):
-        pass
+    def removePiece(self,piece,moveInfo):
+        self.game.removePieces(piece,moveInfo,self.livePieces,self.whitePieces,self.blackPieces,self.board)
 
-    def changePiece(self,x2,y2,name):
+    def enemyChecks(self,x2,moveInfo):
+        self.game.enemyChecks(x2,y2,self.board,moveInfo)
+
+    def changePiece(self,x2,y2,name,moveInfo):
         name = name.upper()
         tempPiece = self.board[x2][y2]
 
@@ -79,6 +83,10 @@ class Board:
             self.blackPieces.append(self.board[x2][y2])
 
         tempBool = False
+        tempBool = start_new_thread(self.game.insufficientMaterial(),(self.livePieces,self.whitePieces,self.blackPieces,self.board))
+
+        if tempBool:
+            moveInfo.Draw = True
         # insufficient material draw code here
 
 
@@ -99,11 +107,20 @@ class Board:
                     #win.blit(pygame.transform.flip(self.board[i][j].surf, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
 
 
-    def move(self,x1,y1,x2,y2):
+    def move(self,x1,y1,x2,y2,moveInfo):
+        tempPiece = None
+        move = False
         if self.board[x1][y1] is not None:
             if (self.board[x2][y2] is not None and self.board[x1][y1].team != self.board[x2][y2].team) or self.board[x2][y2] is None:
-                if self.board[x1][y1].ValidMove(x1,y1,x2,y2,self.board):
-                    self.board[x1][y1],self.board[x2][y2] = None,self.board[x1][y1]
+                tempPiece = board[x2][y2]
+            if self.game.Move(x1,y1,x2,y2,self.board,moveInfo):
+                move = True
+                if tempPiece is not None:
+                    self.removePiece(tempPiece,moveInfo)
+        return move
+
+    def updateEnemyPieces(self,moveInfo):
+        self.game.updateEnemyPieces(moveInfo,self.board,self.livePieces,self.whitePieces,self.blackPieces)
 
     def isEmpty(self,x,y):
         return self.board[x][y] is None
