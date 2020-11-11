@@ -108,10 +108,10 @@ class Board:
                     #win.blit(pygame.transform.flip(self.board[i][j].surf, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
 
 
-    def move(self,x1,y1,x2,y2,moveInfo):
+    def move(self,x1,y1,x2,y2,moveInfo,currplayer):
         tempPiece = None
         move = False
-        if self.board[x1][y1] is not None:
+        if self.board[x1][y1] is not None and self.board[x1][y1].team == currplayer:
             if (self.board[x2][y2] is not None and self.board[x1][y1].team != self.board[x2][y2].team) or self.board[x2][y2] is None:
                 tempPiece = self.board[x2][y2]
                 #if tempPiece is not None:

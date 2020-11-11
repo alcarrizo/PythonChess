@@ -34,6 +34,7 @@ chessRight, chessDown = (SCREEN_WIDTH/2 - (60*4))+(60 * 8),(SCREEN_HEIGHT/2 - (6
 def main():
     run = True
     moveInfo = Movement()
+    currPlayer = True
 
     click = False
     win.fill((120, 120, 120))
@@ -56,7 +57,11 @@ def main():
                         y2 = x - chessLeft
                         x2 = y - chessUp
                         #black player rotation
-                        b.move(int(x1/60),int(y1/60),int(x2/60),int(y2/60),moveInfo)
+                        if b.move(int(x1/60),int(y1/60),int(x2/60),int(y2/60),moveInfo,currPlayer):
+                            if currPlayer:
+                                currPlayer = False
+                            else:
+                                currPlayer = True
                         #white player rotation
                         #b.move(7 - int(x1 / 60), 7 - int(y1 / 60), 7 - int(x2 / 60),7 - int(y2 / 60))
                         click = False
