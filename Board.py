@@ -47,7 +47,8 @@ class Board:
     def move(self,x1,y1,x2,y2):
         if self.board[x1][y1] is not None:
             if (self.board[x2][y2] is not None and self.board[x1][y1].team != self.board[x2][y2].team) or self.board[x2][y2] is None:
-                self.board[x1][y1],self.board[x2][y2] = None,self.board[x1][y1]
+                if self.board[x1][y1].ValidMove(x1,y1,x2,y2,self.board):
+                    self.board[x1][y1],self.board[x2][y2] = None,self.board[x1][y1]
 
     def isEmpty(self,x,y):
         return self.board[x][y] is None
