@@ -33,7 +33,7 @@ class Game:
 
                     if isinstance(board[x1][y1],King):
 
-                        if board[x1,y1].team:
+                        if board[x1][y1].team:
                             self.whitekingX = x2
                             self.whitekingY = y2
                         else:
@@ -71,7 +71,7 @@ class Game:
                 if move == True:
                     board[x1][y1], board[x2][y2] = None, board[x1][y1]
 
-                    if self.enPassant == True and self.tempPawn is not None:
+                    if enPassant == True and self.tempPawn is not None:
                         if self.tempPawn.enPassant:
                             self.tempPawn.enPassant = False
                         tempPawn = None
@@ -206,7 +206,7 @@ class Game:
                     self.whitekingY = y1
                 return False
         else:
-            if self.Capture(self.blackKingX,self.blackKingY,True, board):
+            if self.Capture(self.blackKingX,self.blackKingY,False, board):
                 board[x1][y1] = board[x2][y2]
                 board[x2][y2] = temp
                 if isinstance(board[x1][y1],King):
@@ -331,9 +331,8 @@ class Game:
                 checkPiece = False
                 if board[i][j] is not None and board[i][j].team != team:
                     if isinstance(board[i][j],Pawn):
-                        slope = abs(y - j) / abs(x - i)
 
-                        if slope == 1 and abs(x - i) <= 1 and abs(y -j) <= 1:
+                        if abs(x - i) <= 1 and abs(y -j) <= 1 and abs(y - j) / abs(x - i) == 1:
                             if board[i][j].team and y > j:
                                 check = True
                                 checkPiece = True
@@ -498,6 +497,8 @@ class Game:
                 ky = self.whitekingY
 
     def allyPieces(self,x1,y1,x2,y2,board):
+        if board[x2][y2] is None:
+            return False
         if board[x1][y1].team == board[x2][y2].team:
             return True
         else:

@@ -39,8 +39,9 @@ class Board:
         self.whitePieces = []
         self.blackPieces = []
         self.livePieces = []
-        self.game = Game(3,0,3,self.height - 1)
+        self.game = Game(0,3,self.height - 1,3)
         self.moveInfo = Movement()
+        self.getPieces()
 
     def getPieces(self):
         for i in range(self.width):
@@ -112,7 +113,9 @@ class Board:
         move = False
         if self.board[x1][y1] is not None:
             if (self.board[x2][y2] is not None and self.board[x1][y1].team != self.board[x2][y2].team) or self.board[x2][y2] is None:
-                tempPiece = board[x2][y2]
+                tempPiece = self.board[x2][y2]
+                #if tempPiece is not None:
+                 #   self.removePiece(tempPiece, moveInfo)
             if self.game.Move(x1,y1,x2,y2,self.board,moveInfo):
                 move = True
                 if tempPiece is not None:
