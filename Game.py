@@ -245,7 +245,7 @@ class Game:
         kx = 0
         ky = 0
 
-        if self.stopCheck(kx,ky,board):
+        if self.stopCheck(x,y,board):
             checkMate = False
 
         if board[x][y].team:
@@ -257,8 +257,9 @@ class Game:
 
         for i in range (-1,2):
             for j in range(-1, 2):
-                if not self.Capture(kx + i, ky + j, board[kx, ky].team, board) and not self.AllyPieces(kx,ky, kx + i, ky + j, board) and board[kx, ky].ValidMove(kx,ky, kx + i,ky + j, board):
-                    checkMate = False
+                if kx + i >= 0 and kx + i < self.width and ky + j >= 0 and ky + j < self.height and not(i == 0 and j == 0):
+                    if not self.Capture(kx + i, ky + j, board[kx][ky].team, board) and not self.allyPieces(kx,ky, kx + i, ky + j, board) and board[kx][ky].ValidMove(kx,ky, kx + i,ky + j, board):
+                        checkMate = False
 
         return checkMate
 
@@ -282,7 +283,7 @@ class Game:
         # checking if the piece putting the king in check can be captured
         for i in range(8):
             for j in range(8):
-                if board[i][j] is not None and board[i][j].team == board[x][y].team and board[i][j].ValidMove(i, j, x, y, board) and not self.allyKinginCheck(kx, ky, x, y, board):
+                if board[i][j] is not None and board[i][j].team != board[x][y].team and board[i][j].ValidMove(i, j, x, y, board) and not self.allyKinginCheck(i, j, x, y, board):
                     stopped = True
 
         if not isinstance(board[x][y],Knight) and stopped == False:
@@ -293,20 +294,20 @@ class Game:
 
             if x > kx:
                 xMove = -1
-            else:
+            elif x < kx:
                 xMove = 1
             if y > ky:
                 yMove = -1
-            else:
+            elif y < ky:
                 yMove = 1
 
-            while tempX + xMove != kx or tempY + yMove != ky:
+            while (tempX + xMove != kx and 0 <= tempX + xMove < self.width) or (tempY + yMove != ky and 0 <= tempY + yMove < self.height):
                 tempX += xMove
                 tempY += yMove
                 for i in range(8):
                     for j in range(8):
-                        if board[i,j] is not None:
-                            if not isinstance(board[i][j], King) and board[i][j].team != board[x, y].team and board[i][j].ValidMove(i, j,tempX, tempY, board) and not self.AllyKinginCheck(i, j, tempX, tempY, board):
+                        if board[i][j] is not None:
+                            if not isinstance(board[i][j], King) and board[i][j].team != board[x][y].team and board[i][j].ValidMove(i, j,tempX, tempY, board) and not self.allyKinginCheck(i, j, tempX, tempY, board):
                                 stopped = True;
         return stopped
 
@@ -321,6 +322,7 @@ class Game:
         else:
             kx = self.whitekingX
             ky = self.whitekingY
+
         self.Capture(kx,ky,board[kx][ky].team,board)
 
     def Capture(self,x,y,team,board):
@@ -333,18 +335,18 @@ class Game:
                 if board[i][j] is not None and board[i][j].team != team:
                     if isinstance(board[i][j],Pawn):
 
-                        if abs(x - i) <= 1 and abs(y -j) <= 1 and abs(y - j) / abs(x - i) == 1:
+                        if abs(x - i) <= 1 and abs(y -j) <= 1 and x != i and abs(y - j) / abs(x - i) == 1:
                             if board[i][j].team and y > j:
                                 check = True
                                 checkPiece = True
-                            elif board[i][j].team and y < j:
+                            elif not board[i][j].team and y < j:
                                 check = True
                                 checkPiece = True
                             if checkPiece == True and board[x][y] is not None and isinstance(board[x][y],King):
                                 self.checkPieces.append((i,j))
                     elif board[i][j].ValidMove(i,j,x,y,board):
                         check = True
-                        if board[i][j] is not None and isinstance(board[i][j],King):
+                        if board[x][y] is not None and isinstance(board[x][y],King):
                             self.checkPieces.append((i,j))
         return check
 
@@ -505,9 +507,10 @@ class Game:
         else:
             return False
 
-    def Promotion(self,x,y,board,moveInfo,yPos):
+    def Promotion(self,x,y,board,moveInfo,yPos,livePieces,whitePieces,blackPieces):
         promoteChoices = [Queen(board[x][y].team),Knight(board[x][y].team),Bishop(board[x][y].team),Rook(board[x][y].team)]
 
+        tempPiece = board[x][y]
         board[x][y] = promoteChoices[yPos]
         if isinstance(promoteChoices[yPos],Queen):
             moveInfo.pawnEvolvesTo = "Queen"
@@ -517,5 +520,17 @@ class Game:
             moveInfo.pawnEvolvesTo = "Bishop"
         elif isinstance(promoteChoices[yPos],Rook):
             moveInfo.pawnEvolvesTo = "Rook"
+
+        self.swapPieces(tempPiece,board[x][y],moveInfo,livePieces,whitePieces,blackPieces)
+
+    def swapPieces(self,tempPiece,newPiece,moveInfo,livePieces,whitePieces,blackPieces):
+        livePieces.remove(tempPiece)
+        livePieces.append(newPiece)
+        if tempPiece.team:
+            whitePieces.remove(tempPiece)
+            whitePieces.append(newPiece)
+        else:
+            blackPieces.remove(tempPiece)
+            blackPieces.append(newPiece)
 
 

@@ -118,6 +118,7 @@ class Board:
                 #if tempPiece is not None:
                  #   self.removePiece(tempPiece, moveInfo)
             if self.game.Move(x1,y1,x2,y2,self.board,moveInfo):
+                self.game.enemyChecks(x2,y2,self.board,moveInfo)
                 #pawn promotion
                 if (x2 == 0 or x2 == self.height-1) and isinstance(self.board[x2][y2],Pawn):
 
@@ -153,4 +154,4 @@ class Board:
                     if chessLeft <= mx <= chessRight and chessUp <= my <= chessDown:
                         yPos = int((my - chessUp) / 60)
                         run = False
-        self.game.Promotion(x, y, self.board, moveInfo,yPos)
+        self.game.Promotion(x, y, self.board, moveInfo,yPos,self.livePieces,self.whitePieces,self.blackPieces)

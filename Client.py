@@ -9,7 +9,7 @@ win = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 pygame.display.set_caption("Client")
 
-
+pygame.font.init()
 
 
 def drawBoard(win):
@@ -23,7 +23,7 @@ def drawBoard(win):
 
 
 
-b = Board()
+
 
 # getting the border of the chess board to help find mouse position
 chessLeft, chessUp = (SCREEN_WIDTH/2 - (60*4)),(SCREEN_HEIGHT/2 - (60*4))
@@ -33,14 +33,16 @@ chessRight, chessDown = (SCREEN_WIDTH/2 - (60*4))+(60 * 8),(SCREEN_HEIGHT/2 - (6
 
 def main():
     run = True
-    moveInfo = Movement()
+
     currPlayer = True
+    b = Board()
 
     click = False
     win.fill((120, 120, 120))
     win2 = pygame.transform.rotate(win,360)
 
     while run:
+        moveInfo = Movement()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -58,13 +60,33 @@ def main():
                         x2 = y - chessUp
                         #black player rotation
                         if b.move(int(x1/60),int(y1/60),int(x2/60),int(y2/60),moveInfo,currPlayer,win):
-                            if currPlayer:
-                                currPlayer = False
-                            else:
-                                currPlayer = True
                         #white player rotation
                         #b.move(7 - int(x1 / 60), 7 - int(y1 / 60), 7 - int(x2 / 60),7 - int(y2 / 60))
-                        click = False
+                            click = False
+                            if moveInfo.checkMate:
+                                font = pygame.font.SysFont("comicsans", 60)
+                                if currPlayer:
+                                    text = font.render("White Player Wins",1,"red")
+                                    win.blit(text, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+                                else:
+                                    text = font.render("Black Player Wins", 1, "red")
+                                    win.blit(text, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+                                pygame.display.update()
+                                run2 = True
+                                while run2:
+                                    for event in pygame.event.get():
+                                        if event.type == pygame.QUIT:
+                                            pygame.quit()
+                                            run2 = False
+                                        if event.type == pygame.MOUSEBUTTONDOWN:
+                                            b = Board()
+                                            run2 = False
+
+                        if currPlayer:
+                            currPlayer = False
+                        else:
+                            currPlayer = True
+
 
 
 
