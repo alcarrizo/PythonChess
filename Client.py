@@ -57,7 +57,7 @@ def main():
                         y2 = x - chessLeft
                         x2 = y - chessUp
                         #black player rotation
-                        if b.move(int(x1/60),int(y1/60),int(x2/60),int(y2/60),moveInfo,currPlayer):
+                        if b.move(int(x1/60),int(y1/60),int(x2/60),int(y2/60),moveInfo,currPlayer,win):
                             if currPlayer:
                                 currPlayer = False
                             else:

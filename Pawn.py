@@ -21,12 +21,11 @@ class Pawn(Piece):
         if x2 == x1:
             return False
 
-        slope = abs((y2 - y1) / (x2 - x1))
         moveSize = 1
 
         #white piece
         if(self.team):
-            if x2 > x1 and y2 == y1 and p[x2][y2] is None or slope == 1 and self.Capture(x1,y1,x2,y2,p) and x2 > x1:
+            if x2 > x1 and y2 == y1 and p[x2][y2] is None or x2 > x1 and abs((y2 - y1) / (x2 - x1)) == 1 and self.Capture(x1,y1,x2,y2,p):
                 if self.firstMove:
                     moveSize = 2
                 if abs(x2-x1) <= moveSize and self.ValidPath(x1,y1,x2,y2,p):
@@ -36,7 +35,7 @@ class Pawn(Piece):
                     return False
         # black piece
         else:
-            if x2 < x1 and y2 == y1 and p[x2][y2] is None or slope == 1 and self.Capture(x1,y1,x2,y2,p) and x2 < x1:
+            if x2 < x1 and y2 == y1 and p[x2][y2] is None or x2 < x1 and abs((y2 - y1) / (x2 - x1)) == 1 and self.Capture(x1,y1,x2,y2,p):
                 if self.firstMove:
                     moveSize = 2
                 if abs(x2-x1) <= moveSize and self.ValidPath(x1,y1,x2,y2,p):

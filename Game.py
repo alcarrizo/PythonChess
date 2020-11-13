@@ -6,6 +6,7 @@ from Queen import Queen
 from Rook import Rook
 from Knight import Knight
 from _thread import *
+import pygame
 
 class Game:
     def __init__(self,wkx,wky,bkx,bky):
@@ -80,27 +81,27 @@ class Game:
 
     def isEnpassant(self,x1,y1,x2,y2,board,moveInfo):
         capture = False
-        slope = abs((y2 -y1) / (x2-x1))
-        if slope == 1 and abs(x2-x1) == 1 and abs(y2 -y1) == 1:
-            if board[x1][y1].team == True and y2 > y1:
-                if board[x2][y2 - 1] is not None and board[x2][y2 - 1].team != board[x1][y1].team:
-                    temp = board[x2][y2 - 1]
+
+        if abs(x2-x1) == 1 and abs(y2 -y1) == 1 and abs((y2 -y1) / (x2-x1)) == 1:
+            if board[x1][y1].team == True and x2 > x1:
+                if board[x2 - 1][y2] is not None and board[x2 - 1][y2].team != board[x1][y1].team:
+                    temp = board[x2 - 1][y2]
                     if temp.enPassant:
-                        moveInfo.pawnX = x2
-                        moveInfo.pawnY = y2 - 1
+                        moveInfo.pawnX = x2 - 1
+                        moveInfo.pawnY = y2
 
                         capture = True
-                        board[x2][y2 - 1] = None;
+                        board[x2 - 1][y2] = None;
 
-            elif board[x1][y1].team == False and y2 < y1:
-                if board[x2][y2 + 1] is not None and board[x2][y2 + 1].team != board[x1][y1].team:
-                    temp = board[x2][y2 + 1]
+            elif board[x1][y1].team == False and x2 < x1:
+                if board[x2 + 1][y2] is not None and board[x2 + 1][y2].team != board[x1][y1].team:
+                    temp = board[x2 + 1][y2]
                     if temp.enPassant == True:
-                        moveInfo.pawnX = x2
-                        moveInfo.pawnY = y2 + 1
+                        moveInfo.pawnX = x2 + 1
+                        moveInfo.pawnY = y2
 
                         capture = True
-                        board[x2][y2 + 1] = None
+                        board[x2 + 1][y2] = None
 
         return capture
 
@@ -112,38 +113,38 @@ class Game:
         tempRook = None
 
 
-        if x1 - x2 == -2 and y1 == y2:
+        if y1 - y2 == -2 and x1 == x2:
 
-            if board[0][y1] is not None and isinstance(board[0][y1],Rook):
-                tempRook = board[self.width - 1][ y1]
+            if board[x1][self.width - 1] is not None and isinstance(board[x1][self.width - 1],Rook):
+                tempRook = board[x1][self.width - 1]
 
                 if tempKing.firstMove and tempRook.firstMove:
-                    for i in range(x1 + 1,self.width - 1):
-                        if board[i][y1] is not None or (i <= x2 and self.Capture(i, y1, board[x1][y1].team, board)):
+                    for i in range(y1 + 1,self.width - 1):
+                        if board[x1][i] is not None or (i <= y2 and self.Capture(x1, i, board[x1][y1].team, board)):
                             clearSpace = False
                 else:
                     clearSpace = False
 
             if clearSpace == True:
 
-                moveInfo.rookStartX = self.width - 1
-                moveInfo.rookStartY = y1
-                moveInfo.rookEndX = x2 - 1
-                moveInfo.rookEndY = y1
+                moveInfo.rookStartX = x1
+                moveInfo.rookStartY = self.width - 1
+                moveInfo.rookEndX = x1
+                moveInfo.rookEndY = y2 - 1
 
-                board[x2 - 1][y1],board[self.width - 1][y1] = board[self.width - 1][y1],None
+                board[x1][y2-1],board[x1][self.width - 1] = board[x1][self.width - 1],None
                 castling = True
                 tempRook.firstMove = False
                 tempKing.firstMove = False
 
-        elif x1 - x2 == 2 and y1 == y2:
+        elif y1 - y2 == 2 and x1 == x2:
 
-            if board[0][y1] is not None and isinstance(board[0][y1],Rook):
-                tempRook = board[0][y1]
+            if board[x1][0] is not None and isinstance(board[x1][0],Rook):
+                tempRook = board[x1][0]
 
                 if tempKing.firstMove and tempRook.firstMove:
-                    for i in range(x1 - 1,0,-1):
-                        if board[i][y1] is not None or (i >= x2 and self.Capture(i, y1, board[x1][y1].team, board)):
+                    for i in range(y1 - 1,0,-1):
+                        if board[x1][i] is not None or (i >= y2 and self.Capture(x1, i, board[x1][y1].team, board)):
                             clearSpace = False
 
                 else:
@@ -151,17 +152,17 @@ class Game:
 
             if clearSpace:
 
-                moveInfo.rookStartX = 0
-                moveInfo.rookStartY = y1
-                moveInfo.rookEndX = x2 + 1
-                moveInfo.rookEndY = y1
+                moveInfo.rookStartX = x1
+                moveInfo.rookStartY = 0
+                moveInfo.rookEndX = x1
+                moveInfo.rookEndY = y2 + 1
 
-                board[x2 + 1][ y1],board[0][y1] = board[0][y1],None
+                board[x1][y2 + 1],board[x1][0] = board[x1][0],None
                 castling = True
                 tempRook.firstMove = False
                 tempKing.firstMove = False
 
-        return castling;
+        return castling
 
 
     def enemyChecks(self,x2,y2,board,moveInfo):
@@ -503,3 +504,18 @@ class Game:
             return True
         else:
             return False
+
+    def Promotion(self,x,y,board,moveInfo,yPos):
+        promoteChoices = [Queen(board[x][y].team),Knight(board[x][y].team),Bishop(board[x][y].team),Rook(board[x][y].team)]
+
+        board[x][y] = promoteChoices[yPos]
+        if isinstance(promoteChoices[yPos],Queen):
+            moveInfo.pawnEvolvesTo = "Queen"
+        elif isinstance(promoteChoices[yPos],Knight):
+            moveInfo.pawnEvolvesTo = "Knight"
+        elif isinstance(promoteChoices[yPos],Bishop):
+            moveInfo.pawnEvolvesTo = "Bishop"
+        elif isinstance(promoteChoices[yPos],Rook):
+            moveInfo.pawnEvolvesTo = "Rook"
+
+

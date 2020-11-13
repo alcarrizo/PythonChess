@@ -108,15 +108,20 @@ class Board:
                     #win.blit(pygame.transform.flip(self.board[i][j].surf, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
 
 
-    def move(self,x1,y1,x2,y2,moveInfo,currplayer):
+    def move(self,x1,y1,x2,y2,moveInfo,currplayer,win):
         tempPiece = None
         move = False
-        if self.board[x1][y1] is not None and self.board[x1][y1].team == currplayer:
+ #       if self.board[x1][y1] is not None and self.board[x1][y1].team == currplayer:
+        if self.board[x1][y1] is not None:
             if (self.board[x2][y2] is not None and self.board[x1][y1].team != self.board[x2][y2].team) or self.board[x2][y2] is None:
                 tempPiece = self.board[x2][y2]
                 #if tempPiece is not None:
                  #   self.removePiece(tempPiece, moveInfo)
             if self.game.Move(x1,y1,x2,y2,self.board,moveInfo):
+                #pawn promotion
+                if (x2 == 0 or x2 == self.height-1) and isinstance(self.board[x2][y2],Pawn):
+
+                    self.Promotion(x2,y2,win,moveInfo)
                 move = True
                 if tempPiece is not None:
                     self.removePiece(tempPiece,moveInfo)
@@ -127,3 +132,25 @@ class Board:
 
     def isEmpty(self,x,y):
         return self.board[x][y] is None
+    def Promotion(self,x,y,win,moveInfo):
+
+        promoteChoices = [Queen(self.board[x][y].team), Knight(self.board[x][y].team), Bishop(self.board[x][y].team),
+                          Rook(self.board[x][y].team)]
+        pygame.draw.rect(win, 'green', ((700 / 2) - 70 / 2, (700 / 2) - 250 / 2, 70, 250))
+        for i in range(4):
+            win.blit(promoteChoices[i].surf, ((700 / 2) - 65 / 2, (700 / 2) - 250 / 2 + 60 * i))
+        pygame.display.update()
+        chessLeft, chessUp = (700 / 2 - 70 / 2), (700 / 2 - 250 / 2)
+        chessRight, chessDown = (700 / 2 - 70 / 2 + 70), ((700 / 2 - 250 / 2) + 250)
+        run = True
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    pygame.quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mx, my = pygame.mouse.get_pos()
+                    if chessLeft <= mx <= chessRight and chessUp <= my <= chessDown:
+                        yPos = int((my - chessUp) / 60)
+                        run = False
+        self.game.Promotion(x, y, self.board, moveInfo,yPos)
