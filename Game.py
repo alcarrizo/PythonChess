@@ -6,6 +6,8 @@ from Queen import Queen
 from Rook import Rook
 from Knight import Knight
 from _thread import *
+from threading import Thread
+import queue
 import pygame
 
 class Game:
@@ -352,6 +354,8 @@ class Game:
 
 
     def removePieces(self,tempPiece,moveInfo,livePieces,whitePieces,blackPieces,board):
+
+
         livePieces.remove(tempPiece)
         if tempPiece.team:
             whitePieces.remove(tempPiece)
@@ -360,7 +364,13 @@ class Game:
 
         tempBool = False
 
-        tempBool = start_new_thread(self.insufficientMaterial,(livePieces,whitePieces,blackPieces,board))
+        que = queue.Queue()
+        t = Thread(target=lambda q, arg1, arg2, arg3, arg4: q.put(self.insufficientMaterial( arg1, arg2, arg3, arg4)),
+                   args=(que, livePieces, whitePieces, blackPieces, board))
+        t.start()
+
+        t.join()
+        tempBool = que.get()
 
         if tempBool:
             moveInfo.Draw = True

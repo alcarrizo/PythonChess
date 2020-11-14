@@ -29,7 +29,15 @@ def drawBoard(win):
 chessLeft, chessUp = (SCREEN_WIDTH/2 - (60*4)),(SCREEN_HEIGHT/2 - (60*4))
 chessRight, chessDown = (SCREEN_WIDTH/2 - (60*4))+(60 * 8),(SCREEN_HEIGHT/2 - (60*4))+  (60*8)
 
+def redrawWindow(b):
+    drawBoard(win)
 
+    b.boardUpdate(win)
+
+    # white player rotation
+    # win.blit(pygame.transform.flip(win,True,True), (0, 0))
+
+    pygame.display.update()
 
 def main():
     run = True
@@ -63,14 +71,19 @@ def main():
                         #white player rotation
                         #b.move(7 - int(x1 / 60), 7 - int(y1 / 60), 7 - int(x2 / 60),7 - int(y2 / 60))
                             click = False
-                            if moveInfo.checkMate:
+                            if moveInfo.checkMate or moveInfo.Draw:
+                                redrawWindow(b)
+
                                 font = pygame.font.SysFont("comicsans", 60)
-                                if currPlayer:
+                                if moveInfo.Draw:
+                                    text = font.render("Its a draw",1,"red")
+                                    win.blit(text,(round(SCREEN_WIDTH/2) - round(text.get_width()/2),round(SCREEN_HEIGHT/2) - round(text.get_height()/2)))
+                                elif currPlayer:
                                     text = font.render("White Player Wins",1,"red")
-                                    win.blit(text, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+                                    win.blit(text,(round(SCREEN_WIDTH/2) - round(text.get_width()/2),round(SCREEN_HEIGHT/2) - round(text.get_height()/2)))
                                 else:
                                     text = font.render("Black Player Wins", 1, "red")
-                                    win.blit(text, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+                                    win.blit(text,(round(SCREEN_WIDTH/2) - round(text.get_width()/2),round(SCREEN_HEIGHT/2) - round(text.get_height()/2)))
                                 pygame.display.update()
                                 run2 = True
                                 while run2:
@@ -90,15 +103,8 @@ def main():
 
 
 
+        redrawWindow(b)
 
-        drawBoard(win)
-
-        b.boardUpdate(win)
-
-        #white player rotation
-        #win.blit(pygame.transform.flip(win,True,True), (0, 0))
-
-        pygame.display.update()
 
 
 main()

@@ -7,6 +7,8 @@ from Rook import Rook
 from Knight import Knight
 from movement import Movement
 from Game import Game
+from threading import Thread
+import queue
 
 from Piece import Piece
 from _thread import *
@@ -84,7 +86,14 @@ class Board:
             self.blackPieces.append(self.board[x2][y2])
 
         tempBool = False
-        tempBool = start_new_thread(self.game.insufficientMaterial(),(self.livePieces,self.whitePieces,self.blackPieces,self.board))
+
+        que = queue.Queue()
+        t = Thread(target=lambda q, arg1, arg2, arg3, arg4: q.put(self.insufficientMaterial(arg1, arg2, arg3, arg4)),
+                   args=(que, self.livePieces, self.whitePieces, self.blackPieces, self.board))
+        t.start()
+
+        t.join()
+        tempBool = que.get()
 
         if tempBool:
             moveInfo.Draw = True
