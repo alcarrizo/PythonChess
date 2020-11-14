@@ -41,15 +41,17 @@ class Board:
         self.game = Game(0,3,8 - 1,3)
         self.moveInfo = Movement()
 
-    def boardUpdate(self,win):
+    def boardUpdate(self,win, playerTeam):
         width,height = pygame.display.get_surface().get_size()
         for i in range(8):
             for j in range(8):
                 if self.board[i][j] is not None:
                     # black player rotation
-                    win.blit(self.board[i][j].surf,((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
+                    if playerTeam == False:
+                       win.blit(self.board[i][j].surf,((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
                     # white player rotation
-                    #win.blit(pygame.transform.flip(self.board[i][j].surf, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
+                    else:
+                        win.blit(pygame.transform.flip(self.board[i][j].surf, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
 
 
     def isPawn(self,x,y):

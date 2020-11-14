@@ -34,13 +34,20 @@ def drawBoard(win):
 chessLeft, chessUp = (SCREEN_WIDTH/2 - (60*4)),(SCREEN_HEIGHT/2 - (60*4))
 chessRight, chessDown = (SCREEN_WIDTH/2 - (60*4))+(60 * 8),(SCREEN_HEIGHT/2 - (60*4))+  (60*8)
 
-def redrawWindow(b):
+def redrawWindow(b,x,y,click,playerTeam):
     drawBoard(win)
 
-    b.boardUpdate(win)
+    b.boardUpdate(win,playerTeam)
 
     # white player rotation
-    # win.blit(pygame.transform.flip(win,True,True), (0, 0))
+    if playerTeam:
+        win.blit(pygame.transform.flip(win,True,True), (0, 0))
+    if click:
+        x,y = y,x
+        if playerTeam:
+            x = 7 - x
+            y = 7 - y
+        pygame.draw.circle(win, 'green',(round((SCREEN_WIDTH / 2 - (60 * 4)) + (60 * y) + 60/2), round((SCREEN_HEIGHT / 2 - (60 * 4)) + (60 * x)) + 60/2), 30, width=4)
 
     pygame.display.update()
 
@@ -83,7 +90,7 @@ def main():
     click = False
     win.fill((120, 120, 120))
     win2 = pygame.transform.rotate(win,360)
-
+    x,y = 0,0
     while run:
         move = False
         moveInfo = Movement()
@@ -93,36 +100,50 @@ def main():
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x,y = pygame.mouse.get_pos()
-                if chessLeft <= x <= chessRight and chessUp <= y <= chessDown:
-                    if click == False and not b.isEmpty(int((y - chessUp)/60),int((x - chessLeft) /60)):
-                        y1 = x - chessLeft
-                        x1 = y - chessUp
-                        click = True
-                        #print(int(x1/60),int(y1/60))
-                    elif click:
-                        y2 = x - chessLeft
-                        x2 = y - chessUp
-                        #black player rotation
-                        #if b.move(int(x1/60),int(y1/60),int(x2/60),int(y2/60),moveInfo,currPlayer,win):
-                        if game.Move(int(x1 / 60), int(y1 / 60), int(x2 / 60), int(y2 / 60),b.board, moveInfo, currPlayer):
 
-                            move = True
-                        else:
-                            move = False
-                        #white player rotation
-                        #b.move(7 - int(x1 / 60), 7 - int(y1 / 60), 7 - int(x2 / 60),7 - int(y2 / 60))
+                if chessLeft <= x <= chessRight and chessUp <= y <= chessDown:
+                    if currPlayer:
+                        y = 7 - int((y - chessLeft) / 60)
+                        x = 7 - int((x - chessUp) / 60)
+                    else:
+                        y = int((y - chessLeft) / 60)
+                        x = int((x - chessUp) / 60)
+
+                    if click == False and not b.isEmpty(y ,x) and b.getTeam(y,x) == currPlayer:
+                        y1 = x
+                        x1 = y
+                        click = True
+
+                    elif click:
+                        y2 = x
+                        x2 = y
+                        #black player rotation
+                        if currPlayer == False:
+                            if game.Move(x1, y1, x2, y2,b.board, moveInfo, currPlayer):
+                                move = True
+                            else:
+                                move = False
+                        # white player rotation
+                        elif currPlayer:
+                            x1, y1, x2, y2 = x1, y1, x2, y2
+                            if game.Move(x1, y1, x2, y2, b.board, moveInfo,currPlayer):
+                                move = True
+                            else:
+                                move = False
+
+                        click = False
 
                         if move == True:
-                            click = False
-                            if b.isPawn(int(x2/60),int(y2/60))and (int(x2/60) == 0 or int(x2/60) == 7 ):
-                                yPos = drawPromoteWindow(b,int(x2/60),int(y2/60))
-                                game.Promotion(int(x2/60),int(y2/60),b.board,moveInfo,yPos)
 
-                            game.enemyChecks(int(x2/60),int(y2/60),b.board,moveInfo)
+                            if b.isPawn(x2,y2)and (x2 == 0 or x2 == 7 ):
+                                yPos = drawPromoteWindow(b,x2,y2)
+                                game.Promotion(x2, y2, b.board,moveInfo,yPos)
+
+                            game.enemyChecks(x2, y2,b.board,moveInfo)
 
 
                             if moveInfo.checkMate or moveInfo.Draw:
-                                redrawWindow(b)
+                                redrawWindow(b,x,y,click,currPlayer)
 
                                 font = pygame.font.SysFont("comicsans", 60)
                                 if moveInfo.Draw:
@@ -145,15 +166,17 @@ def main():
                                             b = Board()
                                             run2 = False
 
-                        if currPlayer:
-                            currPlayer = False
-                        else:
-                            currPlayer = True
+                            if currPlayer:
+                                currPlayer = False
+                            else:
+                                currPlayer = True
 
 
 
 
-        redrawWindow(b)
+        redrawWindow(b,x,y,click,currPlayer)
+
+
 
 
 
