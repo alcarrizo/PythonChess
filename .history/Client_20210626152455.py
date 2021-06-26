@@ -137,7 +137,7 @@ async def main():
                 if temp.checkMate or temp.Draw:
                     redrawWindow(board, 0, 0, False, playerTeam)
                     await EndGame(currPlayer, temp, n)
-                    currPlayer = True
+                    currPlayer = temp.playerTeam
                     temp = n.send("get")
                     board = temp.Board
                     redrawWindow(board, 0, 0, False, playerTeam)
@@ -222,12 +222,8 @@ async def main():
                                 if moveInfo.checkMate or moveInfo.Draw:
                                     redrawWindow(board, x, y, click, playerTeam)
 
-                                    await EndGame(currPlayer, moveInfo, n)
-                                    
+                                    await EndGame(board,currPlayer, moveInfo, n)
                                     currPlayer = True
-                                    temp = n.send("get")
-                                    board = temp.Board 
-                                  #  redrawWindow(board, x, y, click, playerTeam)
                                 else:
                                     if currPlayer:
                                         currPlayer = False
@@ -241,7 +237,7 @@ async def main():
         redrawWindow(board,x,y,click,playerTeam)
 
 
-async def EndGame(currPlayer, moveInfo, n):
+async def EndGame(board,currPlayer, moveInfo, n):
     font = pygame.font.SysFont("comicsans", 60)
     if moveInfo.Draw:
         text = font.render("Its a draw", 1, "red")
@@ -265,7 +261,9 @@ async def EndGame(currPlayer, moveInfo, n):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 temp = n.send("restart")
                 currPlayer = temp.playerTeam
+                board = temp.board
                 run2 = False
+
 
 asyncio.run(main())
 #main()

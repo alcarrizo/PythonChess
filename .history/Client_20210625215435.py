@@ -108,6 +108,7 @@ async def main():
     movement = n.getBoard()
     print(n.getBoard())
     playerTeam = movement.playerTeam
+    print(playerTeam)
     board = movement.Board
 
 
@@ -137,7 +138,7 @@ async def main():
                 if temp.checkMate or temp.Draw:
                     redrawWindow(board, 0, 0, False, playerTeam)
                     await EndGame(currPlayer, temp, n)
-                    currPlayer = True
+                    currPlayer = temp.playerTeam
                     temp = n.send("get")
                     board = temp.Board
                     redrawWindow(board, 0, 0, False, playerTeam)
@@ -223,16 +224,11 @@ async def main():
                                     redrawWindow(board, x, y, click, playerTeam)
 
                                     await EndGame(currPlayer, moveInfo, n)
-                                    
-                                    currPlayer = True
-                                    temp = n.send("get")
-                                    board = temp.Board 
-                                  #  redrawWindow(board, x, y, click, playerTeam)
+
+                                if currPlayer:
+                                    currPlayer = False
                                 else:
-                                    if currPlayer:
-                                        currPlayer = False
-                                    else:
-                                        currPlayer = True
+                                    currPlayer = True
 
 
 
@@ -265,7 +261,9 @@ async def EndGame(currPlayer, moveInfo, n):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 temp = n.send("restart")
                 currPlayer = temp.playerTeam
+                print(currPlayer)
                 run2 = False
+
 
 asyncio.run(main())
 #main()

@@ -8,14 +8,14 @@ class Pawn(Piece):
         self.enPassant = False
         self.team = team
         if(self.team):
-            name = "white pawn.png"
+            self.name = "white pawn.png"
         else:
-            name = "black pawn.png"
+            self.name = "black pawn.png"
 
-        self.surf = pygame.Surface((60,60),pygame.SRCALPHA)
-        image = pygame.image.load(os.path.join(os.path.dirname(__file__)+ "\images",name))
-        image = pygame.transform.scale(image, (60, 60))
-        self.surf.blit(image,(0,0))
+        # self.surf = pygame.Surface((60,60),pygame.SRCALPHA)
+        # image = pygame.image.load(os.path.join(os.path.dirname(__file__)+ "\images",name))
+        # image = pygame.transform.scale(image, (60, 60))
+        # self.surf.blit(image,(0,0))
 
     def ValidMove(self, x1,y1,x2,y2,p):
         if x2 == x1:

@@ -227,7 +227,7 @@ async def main():
                                     currPlayer = True
                                     temp = n.send("get")
                                     board = temp.Board 
-                                  #  redrawWindow(board, x, y, click, playerTeam)
+                                    redrawWindow(board, x, y, click, playerTeam)
                                 else:
                                     if currPlayer:
                                         currPlayer = False

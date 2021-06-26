@@ -7,14 +7,14 @@ class King(Piece):
         self.firstMove = True
         self.team = team
         if self.team:
-            name = "white king.png"
+            self.name = "white king.png"
         else:
-            name = "black king.png"
+            self.name = "black king.png"
 
-        self.surf = pygame.Surface((60, 60), pygame.SRCALPHA)
-        image = pygame.image.load(os.path.join(os.path.dirname(__file__) + "\images", name))
-        image = pygame.transform.scale(image, (60, 60))
-        self.surf.blit(image, (0, 0))
+        # self.surf = pygame.Surface((60, 60), pygame.SRCALPHA)
+        # image = pygame.image.load(os.path.join(os.path.dirname(__file__) + "\images", name))
+        # image = pygame.transform.scale(image, (60, 60))
+        # self.surf.blit(image, (0, 0))
 
     def ValidMove(self, x1,y1,x2,y2,p):
         if abs(y2-y1) <= 1 and abs(x2-x1) <= 1:

@@ -5,13 +5,9 @@ from King import King
 from Queen import Queen
 from Rook import Rook
 from Knight import Knight
-from movement import Movement
-from Game import Game
-from threading import Thread
-import queue
+import os
 
-from Piece import Piece
-from _thread import *
+
 
 class Board:
     def __init__(self):
@@ -38,20 +34,20 @@ class Board:
         self.board[self.height - 1][5] = Bishop(False)
         self.board[self.height - 1][6] = Knight(False)
         self.board[self.height - 1][7] = Rook(False)
-        self.game = Game(0,3,8 - 1,3)
-        self.moveInfo = Movement()
 
     def boardUpdate(self,win, playerTeam):
         width,height = pygame.display.get_surface().get_size()
         for i in range(8):
             for j in range(8):
                 if self.board[i][j] is not None:
+                    image = pygame.image.load(os.path.join(os.path.dirname(__file__) + "\images", self.board[i][j].name))
+                    image = pygame.transform.scale(image, (60, 60))
                     # black player rotation
                     if playerTeam == False:
-                       win.blit(self.board[i][j].surf,((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
+                       win.blit(image,((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
                     # white player rotation
                     else:
-                        win.blit(pygame.transform.flip(self.board[i][j].surf, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
+                        win.blit(pygame.transform.flip(image, False, True),((width/2 ) - (60 * 4) + (60 * j),(height / 2 - (60 * 4)) + (60 * i)))
 
 
     def isPawn(self,x,y):

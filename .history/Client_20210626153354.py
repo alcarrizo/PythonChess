@@ -136,7 +136,7 @@ async def main():
             if temp.validMove and playerTeam == temp.playerTeam:
                 if temp.checkMate or temp.Draw:
                     redrawWindow(board, 0, 0, False, playerTeam)
-                    await EndGame(currPlayer, temp, n)
+                    board = await EndGame(currPlayer, temp, n)
                     currPlayer = True
                     temp = n.send("get")
                     board = temp.Board
@@ -222,12 +222,10 @@ async def main():
                                 if moveInfo.checkMate or moveInfo.Draw:
                                     redrawWindow(board, x, y, click, playerTeam)
 
-                                    await EndGame(currPlayer, moveInfo, n)
+                                    board = await EndGame(currPlayer, moveInfo, n)
                                     
                                     currPlayer = True
-                                    temp = n.send("get")
-                                    board = temp.Board 
-                                  #  redrawWindow(board, x, y, click, playerTeam)
+                                    redrawWindow(board, x, y, click, playerTeam)
                                 else:
                                     if currPlayer:
                                         currPlayer = False
@@ -266,6 +264,7 @@ async def EndGame(currPlayer, moveInfo, n):
                 temp = n.send("restart")
                 currPlayer = temp.playerTeam
                 run2 = False
+    return temp.board
 
 asyncio.run(main())
 #main()
