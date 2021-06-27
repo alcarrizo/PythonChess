@@ -38,6 +38,7 @@ chessLeft, chessUp = (SCREEN_WIDTH/2 - (60*4)),(SCREEN_HEIGHT/2 - (60*4))
 chessRight, chessDown = (SCREEN_WIDTH/2 - (60*4))+(60 * 8),(SCREEN_HEIGHT/2 - (60*4))+  (60*8)
 
 def redrawWindow(board,x,y,click,playerTeam):
+    win.fill((120, 120, 120))
     drawBoard(win)
 
     board.boardUpdate(win,playerTeam)
@@ -52,6 +53,22 @@ def redrawWindow(board,x,y,click,playerTeam):
             x = 7 - x
             y = 7 - y
         pygame.draw.circle(win, 'green',(round((SCREEN_WIDTH / 2 - (60 * 4)) + (60 * y) + 60/2), round((SCREEN_HEIGHT / 2 - (60 * 4)) + (60 * x)) + 60/2), 30, width=4)
+    
+    #Drawing the draw and forfeit buttons
+    pygame.draw.rect(win,'gray', (500, 620, 75, 50))
+    pygame.draw.rect(win,'gray', (575, 620, 75, 50))
+    pygame.draw.rect(win,'black', (500, 620, 75, 50),width = 3)
+    pygame.draw.rect(win,'black', (575, 620, 75, 50),width = 3)
+    font = pygame.font.SysFont("comicsans", 30)
+    text = font.render("Draw", 1, "black")
+    #round(SCREEN_WIDTH / 2) - round(text.get_width() / 2), round(SCREEN_HEIGHT / 2) - round(text.get_height() / 2)
+    #(500, 620, 75, 50)
+    win.blit(text, (
+    (500 + round(text.get_width() / 4), (620 + (50/2)) - round(text.get_height()/2))))
+    text = font.render("Forfeit", 1, "black")
+    win.blit(text, (
+    ((575 + (75/2)) - round(text.get_width() / 2), (620 + (50/2)) - round(text.get_height()/2))))
+    
 
     pygame.display.update()
 
@@ -124,13 +141,25 @@ async def main():
             waiting = asyncio.create_task(WaitForMove(n,run,playerTeam))
             temp, run = await waiting
 
-            #need this loop to actually interact with the window while waiting on the move information,
+            #need this for loop to actually interact with the window while waiting on the move information,
             # without it the window freezes while the player is waiting for the opponent's move
             # It took me way too long to figure this out T_T
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
                     pygame.quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x,y = pygame.mouse.get_pos()
+                    if 500 <= x <= (500 + 75) and 620 <= y <= (620 + 50):
+                        #run = False
+                        #pygame.quit()
+                        pygame.draw.rect(win,'gray', (SCREEN_HEIGHT - (500 + 75), SCREEN_WIDTH - (620 + 50), 75, 50))
+                        pygame.display.update()
+                    elif 575 <= x <= (575 + 75) and 620 <= y <= (620 + 50):
+                        #run = False
+                        #pygame.quit()
+                        pygame.draw.rect(win,'blue', (SCREEN_HEIGHT - (500 + 75), SCREEN_WIDTH - (620 + 50), 75, 50))
+                        pygame.display.update()
 
             board = temp.Board
             if temp.validMove and playerTeam == temp.playerTeam:
@@ -138,7 +167,12 @@ async def main():
                     redrawWindow(board, 0, 0, False, playerTeam)
                     await EndGame(currPlayer, temp, n)
                     currPlayer = True
-                    temp = n.send("get")
+                    try:
+                        temp = n.send("get")
+
+                    except:
+                        run = False
+                        print("Couldn't get game")
                     board = temp.Board
                     redrawWindow(board, 0, 0, False, playerTeam)
                 else:
@@ -210,34 +244,37 @@ async def main():
 
                             if move == True:
 
-                                # #if game.board.isPawn(x2,y2)and (x2 == 0 or x2 == 7 ):
-                                # #   yPos = drawPromoteWindow(game.board, x2, y2)
-                                # if board.isPawn(x2,y2)and (x2 == 0 or x2 == 7 ):
-                                #     yPos = drawPromoteWindow(board,x2,y2, board)
-                                #     game.Promotion(x2, y2,moveInfo,yPos)
-                                #
-                                # game.enemyChecks(x2, y2,moveInfo)
-                                #
-                                #
                                 if moveInfo.checkMate or moveInfo.Draw:
                                     redrawWindow(board, x, y, click, playerTeam)
 
                                     await EndGame(currPlayer, moveInfo, n)
                                     
                                     currPlayer = True
-                                    temp = n.send("get")
+                                    try:
+                                        temp = n.send("get")
+
+                                    except:
+                                        run = False
+                                        print("Couldn't get game")
                                     board = temp.Board 
-                                  #  redrawWindow(board, x, y, click, playerTeam)
                                 else:
                                     if currPlayer:
                                         currPlayer = False
                                     else:
                                         currPlayer = True
+                    elif 500 <= x <= (500 + 75) and 620 <= y <= (620 + 50):
+                        #run = False
+                        #pygame.quit()
+                        pygame.draw.rect(win,'gray', (SCREEN_HEIGHT - (500 + 75), SCREEN_WIDTH - (620 + 50), 75, 50))
+                        pygame.display.update()
+                    elif 575 <= x <= (575 + 75) and 620 <= y <= (620 + 50):
+                        #run = False
+                        #pygame.quit()
+                        pygame.draw.rect(win,'blue', (SCREEN_HEIGHT - (500 + 75), SCREEN_WIDTH - (620 + 50), 75, 50))
+                        pygame.display.update()
 
 
 
-
-        #redrawWindow(game.board,x,y,click,currPlayer)
         redrawWindow(board,x,y,click,playerTeam)
 
 
@@ -263,7 +300,11 @@ async def EndGame(currPlayer, moveInfo, n):
                 pygame.quit()
                 run2 = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                temp = n.send("restart")
+                try:
+                    temp = n.send("restart")
+                except:
+                    run = False
+                    print("Couldn't get game")
                 currPlayer = temp.playerTeam
                 run2 = False
 
